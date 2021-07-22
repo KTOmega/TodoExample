@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>To-do list</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet"> 
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+    font-size: 14px;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#todo {
+    font-family: 'Comic Neue';
+    background-color: #fff2cc;
+    padding: 2em;
+    width: 21rem;
+    min-height: 28rem;
+    box-shadow: 0.25em 0.25em 1.5em rgba(0, 0, 0, 0.25);
+}
+
+#todo h1 {
+    font-weight: bold;
+    font-size: 2rem;
+    margin: 0 0 1rem 0;
+}
+
+#list {
+    font-size: 1.5rem;
+    margin-left: 1em;
+}
+#list ul {
+    list-style-type: square;
+}
+#list li {
+    margin-bottom: 0.5em;
+}
+
+#form {
+    font-family: 'Roboto';
+    font-weight: bold;
+    width: 21rem;
+    min-height: 28rem;
+    margin: 0 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#task-input {
+    border: 2px solid #4a86e8;
+    box-shadow: 0 0 0.5em #4a86e8;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    margin-bottom: 1em;
+    width: 100%;
+    font-size: 1.5rem;
+}
+
+#task-add {
+    font-weight: bold;
+    font-size: 1.5rem;
+    border: 1px solid #274e13;
+    box-shadow: 0 0.25em #274e13;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    background: linear-gradient(#daead3, #95bd83);
+    width: 100%;
+}
+</style>
+
+<script type="text/javascript">
+function updateList() {
+    // Use the Fetch API to get the task list.
+    fetch("/api/task/list")
+        .then(response => response.json())
+        .then((data) => {
+            const list = document.querySelector("#list");
+            const items = data.map((e) => {
+                const el = document.createElement("li");
+                el.innerText = e.task;
+                return el;
+            });
+            const newUl = document.createElement("ul");
+
+            items.forEach((item) => {
+                newUl.appendChild(item);
+            });
+
+            list.innerHTML = "";
+            list.appendChild(newUl);
+        });
+}
+
+function addTask(task) {
+    // Uses the Fetch API to add a new task to the task list,
+    // and then updates the task list so that it fetches the new task.
+    fetch("/api/task/add", {
+        method: "POST",
+        body: JSON.stringify({ task }),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    }).then(updateList);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Populate the task list when the page loads.
+    updateList();
+
+    // When the user clicks the Add task button, add a new task.
+    document.querySelector("#task-add").addEventListener("click", (e) => {
+        const newTask = document.querySelector("#task-input").value;
+        addTask(newTask);
+    });
+});
+</script>
+
+</head>
+<body>
+
+<div id="todo">
+    <h1>To-do list</h1>
+    <div id="list"></div>
+</div>
+
+<div id="form">
+    <input type="text" id="task-input" placeholder="Add a new task..." />
+    <button id="task-add">Add task</button>
+</div>
+
+</body>
+</html>
